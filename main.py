@@ -1,7 +1,7 @@
 from src.load_data import load_dataset
-from src.visualization import plot_points
+from src.visualization import plot_points, plot_points_3d, plot_surface_3d
 from src.variogram import compute_variogram
-from src.kriging_model import run_kriging, plot_kriging, plot_variance, apply_anisotropy
+from src.kriging_model import run_kriging, plot_kriging, plot_variance, apply_anisotropy, run_kriging_3d
 from src.geology import apply_fault_effect
 
 import matplotlib.pyplot as plt
@@ -26,41 +26,35 @@ def plot_coordinate_comparison(x, y, x_aniso, y_aniso, z):
 
 
 def main():
-    # Load data
+    # Load 3D research data
     data = load_dataset()
 
-    # Apply geological fault effect
-    data = apply_fault_effect(data, fault_x=50)
+    # Extract 3D spatial coordinates and anomaly values
+    x = data["X"].values
+    y = data["Y"].values
+    z = data["Profile"].values  # Third spatial dimension
+    anomaly = data["Combined_Anomaly"].values
 
-    x = data["x"].values
-    y = data["y"].values
-    z = data["Ni"].values
+    print(f"Loaded {len(data)} spatial samples with coordinates:")
+    print(f"  X range: {x.min():.1f} - {x.max():.1f}")
+    print(f"  Y range: {y.min():.1f} - {y.max():.1f}")
+    print(f"  Profile (Z) range: {z.min():.1f} - {z.max():.1f}")
+    print(f"  Anomaly range: {anomaly.min():.1f} - {anomaly.max():.1f}")
+    print()
 
-    # Plot updated points
-    plot_points(data, element="Ni")
+    # Plot 1: 3D scatter of sample points
+    print("Displaying 3D spatial distribution of sample points...")
+    plot_points_3d(x, y, z, anomaly, title="3D Geostatistical Sample Points")
 
-    # Apply anisotropy
-    x_aniso, y_aniso = apply_anisotropy(x, y, angle_deg=30, ratio=2)
+    # Plot 2: 3D Kriging prediction
+    print("Computing 3D kriging predictions...")
+    grid_x, grid_y, grid_z, z_pred, z_var = run_kriging_3d(x, y, z, anomaly)
+    print(f"  Grid created: {len(grid_x)} x {len(grid_y)} x {len(grid_z)} = {len(grid_x) * len(grid_y) * len(grid_z)} predictions")
+    print()
 
-    # Compare original and anisotropic coordinates
-    plot_coordinate_comparison(x, y, x_aniso, y_aniso, z)
-
-    # Variogram (anisotropic)
-    bin_centers, bin_means = compute_variogram(x_aniso, y_aniso, z)
-
-    plt.plot(bin_centers, bin_means, 'o-')
-    plt.title("Anisotropic Variogram")
-    plt.xlabel("Distance")
-    plt.ylabel("Semivariance")
-    plt.grid()
-    plt.show()
-
-    # Kriging (with anisotropy)
-    grid_x, grid_y, z_pred, z_var = run_kriging(x_aniso, y_aniso, z)
-
-    # Plot prediction in anisotropic coordinate space
-    plot_kriging(grid_x, grid_y, z_pred, x_aniso, y_aniso, z)
-    plot_variance(grid_x, grid_y, z_var)
+    # Plot 3: 3D Kriging surface
+    print("Displaying 3D kriging prediction surface...")
+    plot_surface_3d(grid_x, grid_y, grid_z, z_pred)
 
 
 if __name__ == "__main__":
