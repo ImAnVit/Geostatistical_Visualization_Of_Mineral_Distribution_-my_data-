@@ -225,6 +225,8 @@ geostat-mineral-visualization_(my_data) - 3D/
 
 - **src/geology.py**: Fault effect simulation (legacy feature)
 
+- **src/anomaly_mineralization_analysis.py**: Combines anomaly and mineral datasets, computes nearest and IDW-based anomaly estimates at mineral sample locations, and saves comparison outputs.
+
 ## Technologies Used
 
 - **Python**: Core programming language
@@ -274,10 +276,21 @@ When you run `python main.py`, you'll see:
    - **Plot 1**: 3D scatter of 23 research samples colored by Combined_Anomaly
    - **Plot 2**: 3D kriging surface slices (one per profile level)
 
-3. **Visualization Features:**
-   - Rotate, zoom, and pan 3D scenes
-   - Color gradients show anomaly intensity
-   - Axis labels and titles for interpretation
+3. **Mineral-Anomaly Comparison:**
+   - `python src/anomaly_mineralization_analysis.py` produces
+     - `data/merged_mineral_anomaly_estimated.csv`
+     - `plots/ni_vs_anomaly_comparison.png`
+
+## Conclusion
+
+The new mineral-anomaly analysis provides a direct comparison between nearest-neighbor and IDW-based anomaly association at mineral sample locations. For this dataset, inverse-distance-weighted anomaly estimates produced a stronger correlation with `Ni` than simple nearest-neighbor mapping, indicating that spatially weighted anomaly interpolation is a better predictor of mineralization trends.
+
+This result supports the use of spatially aware anomaly estimation when evaluating mineralization controls in geostatistical models.
+
+**Visualization Features:**
+- Rotate, zoom, and pan 3D scenes
+- Color gradients show anomaly intensity
+- Axis labels and titles for interpretation
 
 ## Future Improvements
 
